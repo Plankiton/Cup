@@ -1,4 +1,7 @@
-#include "cup.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "cli.h"
 
 void usage(const char * program_name) {
     printf("%s [Options]\n\n" , program_name);
