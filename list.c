@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "list.h"
+#include "icon.h"
 #include "util.h"
 
 #ifdef _WIN32
@@ -66,7 +67,7 @@ char ** ls(const char *path, int count, const int * types) {
     int i = 0; {
         while ((file = readdir(d)) != NULL && i <= count)
         {
-            if (in(
+            if (!types || in(
                     file->d_type,
                     (int *)types,
                     -1
@@ -104,6 +105,34 @@ int count_items(const char *path, const int * types) {
 
     return i;
 }
+
+void just_ls(const char *path, const char * format, const int * types) {
+    DIR *d;
+    struct dirent *file;
+
+    d = opendir(path);
+    if (!d)
+        return;
+
+    while ((file = readdir(d)) != NULL)
+    {
+        if (!strcmp(file->d_name,".")||
+                !strcmp(file->d_name,".."))
+            continue;
+        if (!types || in(
+                    file->d_type,
+                    (int *)types,
+                    -1
+                    )) {
+
+            const char * icon = get_icon(file).icon;
+
+            printf(format, icon, file->d_name);
+        }
+    }
+    closedir(d);
+}
+
 
 void free_list(char **list, int lenght) {
     int i = 0;

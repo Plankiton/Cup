@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "icon.h"
 #include "cup.h"
 
 char show_cat = 0;
@@ -43,6 +44,9 @@ int main(int argc, char *argv[]) {
             category = get_from_patt(cat, cat_list, cat_count);
 
             if (proj) {
+                subdir = strchr(proj, '/');
+                if (subdir)
+                    *subdir++ = 0;
                 char ** proj_list = get_list_proj(category);
                 int count = get_list_proj_count(category);
 
@@ -53,20 +57,21 @@ int main(int argc, char *argv[]) {
                     char proj_path[] = "";
                     strcat(proj_path, get_cat_path(category));
                     strcat(proj_path, project);
+                    if (proj_path[strlen(proj_path)-1] != '/')
+                        strcat(proj_path, "/");
 
-                    int count = count_items(proj_path, NULL);
-                    char ** proj_files = ls(proj_path, count, NULL);
-                    for (int i = 0; i < count; i ++) {
-                        if (strcmp(proj_files[i], ".")&&strcmp(proj_files[i], ".."))
-                            puts(proj_files[i]);
-                    }
+                    if (subdir)
+                        strcat(proj_path, subdir);
 
-                    free_list(proj_files, count);
+                    just_ls(proj_path, "%s  %s\n", NULL);
+
                 } else die("Project not found!");
+                free_list(cat_list, cat_count);
                 free_list(proj_list, count);
                 exit(0);
+
             } else if (category)
-                list_proj(category);
+                just_ls(get_cat_path(category), "%s  %s\n", types);
             else
                 die("Category not found!");
 
@@ -79,9 +84,11 @@ int main(int argc, char *argv[]) {
                     cat = cat_list[i];
                     if (!has_proj(cat))
                         continue;
-                    printf("%s: \n",
-                            cat);
-                    list_proj(cat);
+                    const char * icon = get_icon_by_name("dir").icon;
+
+                    printf("%s %s \n",
+                            icon, cat);
+                    just_ls(get_cat_path(cat), "  %s  %s\n", types);
 
                     putchar('\n');
                     if (i < cat_count - 2)
@@ -152,16 +159,3 @@ char ** get_list_proj(char * category) {
     return ls(cat_path, count, types);
 }
 
-void list_proj(char * category) {
-    char ** proj_list = get_list_proj(category);
-    int count = get_list_proj_count(category);
-    for (int i = 0; i < count; i ++) {
-        if (strcmp(proj_list[i], ".")&&strcmp(proj_list[i], "..")){
-            if (show_cat)
-                putchar('\t');
-            puts(proj_list[i]);
-        }
-    }
-
-    free_list(proj_list, count);
-}

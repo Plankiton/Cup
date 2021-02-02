@@ -10,15 +10,15 @@ void usage(const char * program_name) {
 "Options"
 "\n---------------\n\n"
 "-h                          show this message.\n"
-"-l <cat>                    list the projects on a category\n"
-"                               default: all\n"
+"-l <cat> <proj>/<subdir>    list the projects on a category\n"
+"                               default cat: all, proj: none, subdir: none\n"
 "-L                          list the categories\n"
 "-c <cat> <proj>/<subdir>    create new project on a category\n"
-"                               default cat: proj, subdir: .\n"
+"                               default cat: proj, subdir: none\n"
 "-d <cat> <proj>/<subdir>    delete new project on a category\n"
-"                               default cat: proj, subdir: .\n"
+"                               default cat: proj, subdir: none\n"
 "-s <cat|proj>/<subdir>      show directory of category or project\n\n"
-"                               default cat: proj, subdir: .\n"
+"                               default cat: proj, subdir: none\n"
         );
 }
 
@@ -52,9 +52,10 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
         arglist[ch++] = (char *)"-d";
         arglist[ch++] = (char *)"-c";
     }
-    char *al2[2];{int ch = 0;
+    char *al2[3];{int ch = 0;
         al2[ch++] = (char *)"-d";
         al2[ch++] = (char *)"-c";
+        al2[ch++] = (char *)"-s";
     }
     char *al1[4];{int ch = 0;
         al1[ch++] = (char *)"-l";
@@ -70,7 +71,7 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
             exit(0);
         }
 
-        if (strin(a[i], (const char **)al2, 2)) {
+        if (strin(a[i], (const char **)al2, 3)) {
 
             *cmd = a[i];
             get_arg_value(f, s, a, c, i, arglist);
