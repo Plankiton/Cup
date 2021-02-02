@@ -1,10 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "util.h"
-#include "list.h"
 #include "cup.h"
 
+char * root_path;
 char * program_name;
 char *f = NULL, *s = NULL;
 char *cmd, *cat, *proj, *subdir;
@@ -15,16 +14,17 @@ int main(int argc, char *argv[]) {
 
     parse_command_line(argc, argv, &f, &s, &cmd);
 
-    char * root_path = getenv("HOME");
+    root_path = getenv("HOME");
     if (root_path[strlen(root_path)-1] != '/')
         root_path = strcat(root_path, "/");
     root_path = strcat(root_path, "Create/");
 
-    if (!strcmp(cmd, "-L")) {
-        const int types [] = {4, -1};
-        int count = count_items(root_path, types);
-        char ** cat_list = ls(root_path, count, types);
 
+    const int types [] = {4, -1};
+    int count = count_items(root_path, types);
+    char ** cat_list = ls(root_path, count, types);
+
+    if (!strcmp(cmd, "-L")) {
         if (count > 0) {
             for (int i = 0; i < count; i ++) {
                 if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
@@ -34,10 +34,6 @@ int main(int argc, char *argv[]) {
     } else if (!strcmp(cmd, "-l")) {
         if (f)
             cat = f;
-
-        const int types [] = {4, -1};
-        int count = count_items(root_path, types);
-        char ** cat_list = ls(root_path, count, types);
         if (cat) {
             char * category = NULL;
             if (count > 0) {
@@ -54,27 +50,35 @@ int main(int argc, char *argv[]) {
             }
 
             if (category) {
-                char * cat_path = root_path;
-                cat_path = strcat(cat_path, category);
-                if (cat_path[strlen(cat_path)-1] != '/')
-                    cat_path = strcat(cat_path, "/");
-
-                int count = count_items(cat_path, types);
-                char ** proj_list = ls(cat_path, count, types);
-                for (int i = 0; i < count; i ++) {
-                    if (strcmp(proj_list[i], ".")&&strcmp(proj_list[i], ".."))
-                        puts(proj_list[i]);
-                }
-
-                free_list(proj_list, count);
+                list_proj(category);
             } else {
                 fprintf(stderr, "ERROR: Category not found!");
+                exit(1);
             }
 
         } else {
+
         }
-        free_list(cat_list, count);
+
     }
 
+    free_list(cat_list, count);
     return 0;
+}
+
+void list_proj(char * category) {
+    const int types [] = {4, -1};
+    char * cat_path = root_path;
+    cat_path = strcat(cat_path, category);
+    if (cat_path[strlen(cat_path)-1] != '/')
+        cat_path = strcat(cat_path, "/");
+
+    int count = count_items(cat_path, types);
+    char ** proj_list = ls(cat_path, count, types);
+    for (int i = 0; i < count; i ++) {
+        if (strcmp(proj_list[i], ".")&&strcmp(proj_list[i], ".."))
+            puts(proj_list[i]);
+    }
+
+    free_list(proj_list, count);
 }
