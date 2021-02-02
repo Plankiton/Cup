@@ -17,13 +17,16 @@ int main(int argc, char *argv[]) {
     if (!strcmp(cmd, "-l")) {
         int count = count_items("/home/plankiton/Create/");
         if (count > 0) {
-            char listdir[count][256];
-            ls("/home/plankiton/Create/", (char**)listdir, 7);
+            char ** list = ls("/home/plankiton/Create/", 7);
 
             int i = 0;
-            while (i < count) {
-                printf("!!%s\n", listdir[i++]);
+
+            printf("\n\n%p:\n", list);
+            while (i < count){
+                printf("  %p %s\n", list[i], list[i]);
+                free(list[i++]);
             }
+            free(list);
         }
     }
 

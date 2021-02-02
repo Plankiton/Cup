@@ -53,7 +53,7 @@ void ls(const char *dir, const Types *types, char ***listdir)
 #else
 #include <dirent.h>
 #include <inttypes.h>
-int ls(const char *path, char ** list, int count) {
+char ** ls(const char *path, int count) {
     DIR *d;
     struct dirent *file;
 
@@ -61,17 +61,19 @@ int ls(const char *path, char ** list, int count) {
     if (!d)
         return 0;
 
+    char ** list = (char**)malloc(count*256);
     int i = 0; {
-        while ((file = readdir(d)) != NULL && i < count-1)
+        while ((file = readdir(d)) != NULL && i <= count)
         {
-            puts("JOAO");
+            list[i] = malloc(sizeof file->d_name);
             strcpy(list[i], file->d_name);
+            printf("  %p %s <- %s\n", list[i], list[i], file->d_name);
             i ++;
         }
         closedir(d);
     }
 
-    return 1;
+    return list;
 }
 int count_items(const char *path) {
     DIR *d;
