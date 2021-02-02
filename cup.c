@@ -39,16 +39,7 @@ int main(int argc, char *argv[]) {
         if (cat) {
             char * category = NULL;
             if (count > 0) {
-                for (int i = 0; i < count; i ++) {
-                    char * l_cat = to_lower(cat);
-                    char * cat_name = to_lower(cat_list[i]);
-
-                    if (strstr(cat_name, l_cat)) {
-                        category = cat_list[i];
-                        break;
-                    }
-                }
-
+                category = get_from_patt(cat, cat_list, count);
             }
 
             if (category)
@@ -87,6 +78,19 @@ int main(int argc, char *argv[]) {
 
     free_list(cat_list, count);
     return 0;
+}
+
+char * get_from_patt(char * patt, char **list, int count) {
+    for (int i = 0; i < count; i ++) {
+        char * l_patt = to_lower(patt);
+        char * name = to_lower(list[i]);
+
+        if (strstr(name, l_patt)) {
+            return list[i];
+        }
+    }
+
+    return NULL;
 }
 
 int has_proj(char * category) {

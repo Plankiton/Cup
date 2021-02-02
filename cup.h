@@ -3,3 +3,4 @@
 #include "cli.h"
 void list_proj(char * category);
 int has_proj(char * category);
+char * get_from_patt(char * patt, char **list, int count);

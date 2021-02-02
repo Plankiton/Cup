@@ -18,6 +18,7 @@ void usage(const char * program_name) {
 "-d <cat> <proj>/<subdir>    delete new project on a category\n"
 "                               default cat: proj, subdir: .\n"
 "-s <cat|proj>/<subdir>      show directory of category or project\n\n"
+"                               default cat: proj, subdir: .\n"
         );
 }
 
