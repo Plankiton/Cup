@@ -7,8 +7,9 @@
 void usage(const char * program_name) {
     printf("%s [Options]\n\n" , program_name);
     puts(
-"Options"
-"\n---------------\n\n"
+"Options\n"
+"    default: -s\n"
+"---------------\n\n"
 "-h                          show this message.\n"
 "-l <cat> <proj>/<subdir>    list the projects on a category\n"
 "                               default cat: all, proj: none, subdir: none\n"
@@ -84,6 +85,14 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
                     return;
                 }
             }
+        } else if (!strin(a[i], (const char **)arglist, 6)) {
+            *cmd = "-s";
+            *f = a[i];
+            *s = a[i+1];
+
+            if (*f)
+                if (*s)
+                    return;
         }
         if (strin(a[i], (const char **)al1, 4)) {
             *cmd = a[i];
@@ -92,6 +101,11 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
             if (*f) {
                 return;
             }
+        } else if (!strin(a[i], (const char **)arglist, 6)) {
+            *cmd = "-s";
+            *f = a[i];
+            if (*f)
+                return;
         }
         if (strin(a[i], (const char **)al, 1)) {
             *cmd = a[i];
