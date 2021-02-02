@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "list.h"
+#include "util.h"
 
 #ifdef _WIN32
 /*
@@ -53,7 +54,7 @@ void ls(const char *dir, const Types *types, char ***listdir)
 #else
 #include <dirent.h>
 #include <inttypes.h>
-char ** ls(const char *path, int count) {
+char ** ls(const char *path, int count, const int * types) {
     DIR *d;
     struct dirent *file;
 
@@ -65,17 +66,27 @@ char ** ls(const char *path, int count) {
     int i = 0; {
         while ((file = readdir(d)) != NULL && i <= count)
         {
-            list[i] = malloc(sizeof file->d_name);
-            strcpy(list[i], file->d_name);
-            printf("  %p %s <- %s\n", list[i], list[i], file->d_name);
-            i ++;
+            if (in(
+                    file->d_type,
+                    (int *)types,
+                    -1
+                )) {
+                list[i] = malloc(sizeof file->d_name);
+                strcpy(list[i], file->d_name);
+                /*
+                printf("  %p %s <- %s %i %s\n",
+                        list[i], list[i], file->d_name, file->d_type,
+                        in(file->d_type, types, -1)?"DIR":"FILE");
+                        */
+                i ++;
+            }
         }
         closedir(d);
     }
 
     return list;
 }
-int count_items(const char *path) {
+int count_items(const char *path, const int * types) {
     DIR *d;
     struct dirent *file;
 
@@ -92,5 +103,13 @@ int count_items(const char *path) {
     }
 
     return i;
+}
+
+void free_list(char **list, int lenght) {
+    int i = 0;
+    while (i < lenght){
+        free(list[i++]);
+    }
+    free(list);
 }
 #endif

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "util.h"
 #include "cli.h"
 
 void usage(const char * program_name) {
@@ -20,22 +21,12 @@ void usage(const char * program_name) {
         );
 }
 
-char in(char * s, char *ls[], int lsl) {
-    for (int i = 0; i < lsl; i++) {
-        if (!ls[i]) continue;
-        if (!strcmp(s, ls[i])) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 void get_arg_value(char **first, char **second, char ** a, int c, int i, char ** arglist) {
     i++;
     if (i >= c)
         return;
 
-    if (!in(a[i], arglist, 6)) {
+    if (!strin(a[i], (const char **)arglist, 6)) {
         if (i >= c)
             return;
 
@@ -43,7 +34,7 @@ void get_arg_value(char **first, char **second, char ** a, int c, int i, char **
         if (i >= c)
             return;
 
-        if (!in(a[i], arglist, 6)) {
+        if (!strin(a[i], (const char **)arglist, 6)) {
             *second = a[i];
         }
 
@@ -77,7 +68,7 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
             exit(0);
         }
 
-        if (in(a[i], al2, 2)) {
+        if (strin(a[i], (const char **)al2, 2)) {
 
             *cmd = a[i];
             get_arg_value(f, s, a, c, i, arglist);
@@ -88,7 +79,7 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
                 }
             }
         }
-        if (in(a[i], al, 4)) {
+        if (strin(a[i], (const char **)al, 4)) {
             *cmd = a[i];
             get_arg_value(f, s, a, c, i, arglist);
 

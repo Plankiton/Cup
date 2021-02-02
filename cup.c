@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "util.h"
 #include "list.h"
 #include "cup.h"
 
@@ -15,19 +16,53 @@ int main(int argc, char *argv[]) {
     parse_command_line(argc, argv, &f, &s, &cmd);
 
     if (!strcmp(cmd, "-l")) {
-        int count = count_items("/home/plankiton/Create/");
-        if (count > 0) {
-            char ** list = ls("/home/plankiton/Create/", 7);
+        if (f)
+            cat = f;
 
-            int i = 0;
+        char * root_path = getenv("HOME");
+        if (root_path[strlen(root_path)-1] != '/')
+            root_path = strcat(root_path, "/");
+        root_path = strcat(root_path, "Create/");
 
-            printf("\n\n%p:\n", list);
-            while (i < count){
-                printf("  %p %s\n", list[i], list[i]);
-                free(list[i++]);
+        const int types [] = {4, -1};
+        int count = count_items(root_path, types);
+        char ** cat_list = ls(root_path, count, types);
+        if (cat) {
+            char * category = NULL;
+            if (count > 0) {
+                for (int i = 0; i < count; i ++) {
+                    char * l_cat = to_lower(cat);
+                    char * cat_name = to_lower(cat_list[i]);
+
+                    if (strstr(cat_name, l_cat)) {
+                        category = cat_list[i];
+                        break;
+                    }
+                }
+
             }
-            free(list);
+
+            if (category) {
+                char * cat_path = root_path;
+                cat_path = strcat(cat_path, category);
+                if (cat_path[strlen(cat_path)-1] != '/')
+                    cat_path = strcat(cat_path, "/");
+
+                int count = count_items(cat_path, types);
+                char ** proj_list = ls(cat_path, count, types);
+                for (int i = 0; i < count; i ++) {
+                    if (strcmp(proj_list[i], ".")&&strcmp(proj_list[i], ".."))
+                        puts(proj_list[i]);
+                }
+
+                free_list(proj_list, count);
+            } else {
+                fprintf(stderr, "ERROR: Category not found!");
+            }
+
+        } else {
         }
+        free_list(cat_list, count);
     }
 
     return 0;
