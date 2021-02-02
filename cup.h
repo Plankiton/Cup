@@ -9,3 +9,4 @@ int has_proj(char * category);
 
 char * get_from_patt(char * patt, char **list, int count);
 char * get_cat_path(char * category);
+char * get_proj_path(char * category, char * project);

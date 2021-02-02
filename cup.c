@@ -4,7 +4,6 @@
 #include "icon.h"
 #include "cup.h"
 
-char show_cat = 0;
 char * root_path;
 char * program_name;
 char *f = NULL, *s = NULL;
@@ -26,6 +25,8 @@ int main(int argc, char *argv[]) {
     int cat_count = count_items(root_path, types);
     if (cat_count < 0)
         die("\"%s\" %s", root_path, "not exists, create it first");
+    else if (cat_count == 0)
+        die("not exist categories, create it first");
     char ** cat_list = ls(root_path, cat_count, types);
 
     if (!strcmp(cmd, "-L")) {
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
             if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
                 puts(cat_list[i]);
         }
-    } else if (!strcmp(cmd, "-l") && cat_count > 0) {
+    } else if (!strcmp(cmd, "-l")) {
         if (f)
             cat = f;
         if (s)
@@ -76,7 +77,6 @@ int main(int argc, char *argv[]) {
                 die("Category not found!");
 
         } else {
-            show_cat = 1;
             putchar('\n');
             for (int i = 0; i < cat_count; i ++) {
                 if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
@@ -97,6 +97,36 @@ int main(int argc, char *argv[]) {
             }
         }
 
+    } else if (!strcmp(cmd, "-s")) {
+
+        if (f && !s) {
+            for (int i = 0; i < cat_count; i++) {
+                if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], "..")) {
+                    char * p = get_proj_path(cat_list[i], f);
+                    if (p)
+                        proj = p;
+                }
+                if (proj) break;
+            }
+            if (!proj) {
+                cat = get_from_patt(f, cat_list, cat_count);
+                if (cat)
+                    cat = get_cat_path(cat);
+            }
+        } else {
+            cat = get_from_patt(f, cat_list, cat_count);
+            proj = get_proj_path(cat, s);
+        }
+
+        if (cat && proj) {
+            puts(proj);
+        } else if (cat) {
+            puts(cat);
+        } else if (proj) {
+            puts(proj);
+        } else {
+            die("category or project not found!");
+        }
     }
 
     free_list(cat_list, cat_count);
@@ -126,6 +156,38 @@ char * get_cat_path(char * category) {
 
     return cat_path;
 }
+
+
+char * get_proj_path(char * cat, char * proj) {
+    char * cat_path = get_cat_path(cat);
+
+    if (proj) {
+        subdir = strchr(proj, '/');
+        if (subdir)
+            *subdir++ = 0;
+        char ** proj_list = get_list_proj(cat);
+        int count = get_list_proj_count(cat);
+
+        char * project = get_from_patt(proj, proj_list, count);
+
+        if (project) {
+
+            char * proj_path = cat_path;
+            strcat(proj_path, project);
+            if (proj_path[strlen(proj_path)-1] != '/')
+                strcat(proj_path, "/");
+
+            if (subdir)
+                strcat(proj_path, subdir);
+
+            return proj_path;
+        }
+        free_list(proj_list, count);
+    }
+
+    return NULL;
+}
+
 
 int has_proj(char * category) {
     char * cat_path = get_cat_path(category);
