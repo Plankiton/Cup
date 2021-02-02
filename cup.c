@@ -19,9 +19,10 @@ int main(int argc, char *argv[]) {
         root_path = strcat(root_path, "/");
     root_path = strcat(root_path, "Create/");
 
-
     const int types [] = {4, -1};
     int count = count_items(root_path, types);
+    if (count < 0)
+        die("\"%s\" %s", root_path, "not exists, create it first");
     char ** cat_list = ls(root_path, count, types);
 
     if (!strcmp(cmd, "-L")) {
@@ -49,12 +50,10 @@ int main(int argc, char *argv[]) {
 
             }
 
-            if (category) {
+            if (category)
                 list_proj(category);
-            } else {
-                fprintf(stderr, "ERROR: Category not found!");
-                exit(1);
-            }
+            else
+                die("Category not found!");
 
         } else {
 

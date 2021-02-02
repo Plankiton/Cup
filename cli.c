@@ -95,7 +95,6 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
     }
 
     usage(program_name);
-    fputs("ERROR: Have a missing argument!", stderr);
-    exit(1);
+    die("Have a missing argument!");
 }
 
