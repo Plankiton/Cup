@@ -30,10 +30,7 @@ int main(int argc, char *argv[]) {
     char ** cat_list = ls(root_path, cat_count, types);
 
     if (!strcmp(cmd, "-L")) {
-        for (int i = 0; i < cat_count; i ++) {
-            if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
-                puts(cat_list[i]);
-        }
+        just_ls(root_path, "%s  %s\n", NULL);
     } else if (!strcmp(cmd, "-l")) {
         if (f)
             cat = f;
@@ -86,7 +83,7 @@ int main(int argc, char *argv[]) {
                         continue;
                     const char * icon = get_icon_by_name("dir").icon;
 
-                    printf("%s %s \n",
+                    printf("%s  %s \n",
                             icon, cat);
                     just_ls(get_cat_path(cat), "  %s  %s\n", types);
 
