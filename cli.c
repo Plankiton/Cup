@@ -67,7 +67,7 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
         al1[ch++] = (char *)"-d";
         al1[ch++] = (char *)"-c";
     }
-    char *al[1] = {"-L"};
+    char *al[2] = {"-L", "-l"};
 
     for (int i = 1; i < c; i ++) {
         if (!strcmp(a[i], "-h")) {
@@ -107,7 +107,7 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
             if (*f)
                 return;
         }
-        if (strin(a[i], (const char **)al, 1)) {
+        if (strin(a[i], (const char **)al, 2)) {
             *cmd = a[i];
             return;
         }
