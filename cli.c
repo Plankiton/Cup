@@ -55,12 +55,13 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
         al2[ch++] = (char *)"-d";
         al2[ch++] = (char *)"-c";
     }
-    char *al[4];{int ch = 0;
-        al[ch++] = (char *)"-l";
-        al[ch++] = (char *)"-s";
-        al[ch++] = (char *)"-d";
-        al[ch++] = (char *)"-c";
+    char *al1[4];{int ch = 0;
+        al1[ch++] = (char *)"-l";
+        al1[ch++] = (char *)"-s";
+        al1[ch++] = (char *)"-d";
+        al1[ch++] = (char *)"-c";
     }
+    char *al[1] = {"-L"};
 
     for (int i = 0; i < c; i ++) {
         if (!strcmp(a[i], "-h")) {
@@ -79,13 +80,17 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
                 }
             }
         }
-        if (strin(a[i], (const char **)al, 4)) {
+        if (strin(a[i], (const char **)al1, 4)) {
             *cmd = a[i];
             get_arg_value(f, s, a, c, i, arglist);
 
             if (f) {
                 return;
             }
+        }
+        if (strin(a[i], (const char **)al, 1)) {
+            *cmd = a[i];
+            return;
         }
     }
 

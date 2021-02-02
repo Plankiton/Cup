@@ -15,14 +15,25 @@ int main(int argc, char *argv[]) {
 
     parse_command_line(argc, argv, &f, &s, &cmd);
 
-    if (!strcmp(cmd, "-l")) {
+    char * root_path = getenv("HOME");
+    if (root_path[strlen(root_path)-1] != '/')
+        root_path = strcat(root_path, "/");
+    root_path = strcat(root_path, "Create/");
+
+    if (!strcmp(cmd, "-L")) {
+        const int types [] = {4, -1};
+        int count = count_items(root_path, types);
+        char ** cat_list = ls(root_path, count, types);
+
+        if (count > 0) {
+            for (int i = 0; i < count; i ++) {
+                if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
+                    puts(cat_list[i]);
+            }
+        }
+    } else if (!strcmp(cmd, "-l")) {
         if (f)
             cat = f;
-
-        char * root_path = getenv("HOME");
-        if (root_path[strlen(root_path)-1] != '/')
-            root_path = strcat(root_path, "/");
-        root_path = strcat(root_path, "Create/");
 
         const int types [] = {4, -1};
         int count = count_items(root_path, types);
