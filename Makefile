@@ -5,4 +5,4 @@ obj:
 	${CC} -c *.c ${CFLAGS} ${LDFLAGS}
 
 clean:
-	rm *.o *.a *.bin cup
+	rm *.o *.a *.bin cup -v 2> /dev/null
