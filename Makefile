@@ -3,3 +3,6 @@ all: obj
 
 obj:
 	${CC} -c *.c ${CFLAGS} ${LDFLAGS}
+
+clean:
+	rm *.o *.a *.bin cup
