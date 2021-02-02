@@ -38,8 +38,7 @@ int main(int argc, char *argv[]) {
             proj = s;
 
         if (cat) {
-            char * category = NULL;
-            category = get_from_patt(cat, cat_list, cat_count);
+            char * category = get_from_patt(cat, cat_list, cat_count);
 
             if (proj) {
                 subdir = strchr(proj, '/');
@@ -70,8 +69,11 @@ int main(int argc, char *argv[]) {
 
             } else if (category)
                 just_ls(get_cat_path(category), "%s  %s\n", types);
-            else
+            else if (!category) {
+                // TODO: way to list inside a proj without a category
+            } else {
                 die("Category not found!");
+            }
 
         } else {
             putchar('\n');

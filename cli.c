@@ -56,10 +56,11 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
         arglist[ch++] = (char *)"-d";
         arglist[ch++] = (char *)"-c";
     }
-    char *al2[3];{int ch = 0;
+    char *al2[4];{int ch = 0;
         al2[ch++] = (char *)"-d";
         al2[ch++] = (char *)"-c";
         al2[ch++] = (char *)"-s";
+        al2[ch++] = (char *)"-l";
     }
     char *al1[4];{int ch = 0;
         al1[ch++] = (char *)"-l";
@@ -75,7 +76,7 @@ void parse_command_line(const int c, char *a[], char ** f, char ** s, char ** cm
             exit(0);
         }
 
-        if (strin(a[i], (const char **)al2, 3)) {
+        if (strin(a[i], (const char **)al2, 4)) {
 
             *cmd = a[i];
             get_arg_value(f, s, a, c, i, arglist);
