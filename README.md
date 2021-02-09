@@ -9,12 +9,12 @@ Before anything, this project stil cant run on Windows, and you will need to cre
 ```
 $HOME/
 	Create/                    // Root folder, must be on $HOME/Create
-		Projects/              // Category, must exist at least one
-			HelloWorld/        // Project
+		Projects/                // Category, must exist at least one
+			HelloWorld/            // Project
 				hello.c
 				readme.md
-		Tests/                 // Another Category
-			Test_Hello/        // Another Project
+		Tests/                   // Another Category
+			Test_Hello/            // Another Project
 				test.py
 ```
 
@@ -53,6 +53,19 @@ $ cup -l proj
 $ cup -l proj hello
   README.md
   hello.c
+```
+
+```shell
+$ cup -l hello
+  README.md
+  hello.c
+```
+
+```shell
+$ mkdir $(cup -s hello)/dir
+$ touch $(cup -s hello)/dir/joao.txt
+$ cup -l hello/dir
+  joao.txt
 ```
 
 ```shell
