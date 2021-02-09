@@ -42,6 +42,9 @@ int main(int argc, char *argv[]) {
             char * category = get_from_patt(cat, cat_list, cat_count);
             char ** proj_list = NULL;
             int count = 0;
+            subdir = strchr(proj, '/');
+            if (subdir)
+                *subdir++ = 0;
 
             if (category) {
                 proj_list = get_list_proj(category);
@@ -50,7 +53,6 @@ int main(int argc, char *argv[]) {
                     proj = NULL;
             } else {
                 cat = NULL;
-                puts("joao");
                 for (int c = 0; c < cat_count; c++) {
                     cat = cat_list[c];
 
@@ -62,9 +64,6 @@ int main(int argc, char *argv[]) {
                     count = get_list_proj_count(category);
 
                     char * project = get_from_patt(proj, proj_list, count);
-                    subdir = strchr(proj, '/');
-                    if (subdir)
-                        *subdir++ = 0;
                     if (project) {
 
                         char proj_path[] = "";
@@ -87,9 +86,6 @@ int main(int argc, char *argv[]) {
 
             if (proj) {
                 char * project = get_from_patt(proj, proj_list, count);
-                subdir = strchr(proj, '/');
-                if (subdir)
-                    *subdir++ = 0;
                 if (project) {
 
                     char proj_path[] = "";

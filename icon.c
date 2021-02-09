@@ -246,7 +246,7 @@ const Icon get_icon_by_name(char * name) {
 
     for (int i = 0; i < FULLNAME; i++)
         if (!strcmp(name, full_names[i].key)) return full_names[i];
-    for (int i = 0; i < FULLNAME; i++) {
+    for (int i = 0; i < EXTENSIONS; i++) {
         char * curr_name = &name[strlen(name)-strlen(extensions[i].key)];
         if (!strcmp(curr_name, extensions[i].key)) return extensions[i];
     }
