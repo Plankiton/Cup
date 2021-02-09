@@ -36,19 +36,60 @@ int main(int argc, char *argv[]) {
             cat = f;
         if (s)
             proj = s;
+        else proj = f;
 
         if (cat) {
             char * category = get_from_patt(cat, cat_list, cat_count);
+            char ** proj_list = NULL;
+            int count = 0;
+
+            if (category) {
+                proj_list = get_list_proj(category);
+                count = get_list_proj_count(category);
+                if (cat == proj)
+                    proj = NULL;
+            } else {
+                cat = NULL;
+                puts("joao");
+                for (int c = 0; c < cat_count; c++) {
+                    cat = cat_list[c];
+
+                    if (!strcmp("..", cat)||!strcmp(".", cat))
+                        continue;
+
+                    category = get_from_patt(cat, cat_list, cat_count);
+                    proj_list = get_list_proj(category);
+                    count = get_list_proj_count(category);
+
+                    char * project = get_from_patt(proj, proj_list, count);
+                    subdir = strchr(proj, '/');
+                    if (subdir)
+                        *subdir++ = 0;
+                    if (project) {
+
+                        char proj_path[] = "";
+                        strcat(proj_path, get_cat_path(category));
+                        strcat(proj_path, project);
+                        if (proj_path[strlen(proj_path)-1] != '/')
+                            strcat(proj_path, "/");
+
+                        if (subdir)
+                            strcat(proj_path, subdir);
+
+                        just_ls(proj_path, "%s  %s\n", NULL);
+
+                        free_list(cat_list, cat_count);
+                        free_list(proj_list, count);
+                        exit(0);
+                    }
+                }
+            }
 
             if (proj) {
+                char * project = get_from_patt(proj, proj_list, count);
                 subdir = strchr(proj, '/');
                 if (subdir)
                     *subdir++ = 0;
-                char ** proj_list = get_list_proj(category);
-                int count = get_list_proj_count(category);
-
-                char * project = get_from_patt(proj, proj_list, count);
-
                 if (project) {
 
                     char proj_path[] = "";
@@ -69,13 +110,8 @@ int main(int argc, char *argv[]) {
 
             } else if (category)
                 just_ls(get_cat_path(category), "%s  %s\n", types);
-            else if (!category) {
-                // TODO: way to list inside a proj without a category
-            } else {
-                die("Category not found!");
-            }
 
-        } else {
+        } else if (!cat && !proj) {
             putchar('\n');
             for (int i = 0; i < cat_count; i ++) {
                 if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
@@ -94,6 +130,9 @@ int main(int argc, char *argv[]) {
                         putchar('\n');
                 }
             }
+        } else if (cat) {
+            char * category = get_from_patt(cat, cat_list, cat_count);
+            just_ls(get_cat_path(category), "%s  %s\n", types);
         }
 
     } else if (!strcmp(cmd, "-s")) {
