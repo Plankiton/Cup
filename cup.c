@@ -132,36 +132,96 @@ int main(int argc, char *argv[]) {
         }
 
     } else if (!strcmp(cmd, "-s")) {
+        if (f)
+            cat = f;
+        if (s)
+            proj = s;
+        else proj = f;
 
-        if (f && !s) {
-            for (int i = 0; i < cat_count; i++) {
-                if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], "..")) {
-                    char * p = get_proj_path(cat_list[i], f);
-                    if (p)
-                        proj = p;
+        if (cat) {
+            char * category = get_from_patt(cat, cat_list, cat_count);
+            char ** proj_list = NULL;
+            int count = 0;
+            subdir = strchr(proj, '/');
+            if (subdir)
+                *subdir++ = 0;
+
+            if (category) {
+                proj_list = get_list_proj(category);
+                count = get_list_proj_count(category);
+                if (cat == proj)
+                    proj = NULL;
+            } else {
+                cat = NULL;
+                for (int c = 0; c < cat_count; c++) {
+                    cat = cat_list[c];
+
+                    if (!strcmp("..", cat)||!strcmp(".", cat))
+                        continue;
+
+                    category = get_from_patt(cat, cat_list, cat_count);
+                    proj_list = get_list_proj(category);
+                    count = get_list_proj_count(category);
+
+                    char * project = get_from_patt(proj, proj_list, count);
+                    if (project) {
+
+                        char proj_path[] = "";
+                        strcat(proj_path, get_cat_path(category));
+                        strcat(proj_path, project);
+                        if (proj_path[strlen(proj_path)-1] != '/')
+                            strcat(proj_path, "/");
+
+                        if (subdir)
+                            strcat(proj_path, subdir);
+
+                        puts(proj_path);
+
+                        free_list(cat_list, cat_count);
+                        free_list(proj_list, count);
+                        exit(0);
+                    }
                 }
-                if (proj) break;
             }
-            if (!proj) {
-                cat = get_from_patt(f, cat_list, cat_count);
-                if (cat)
-                    cat = get_cat_path(cat);
-            }
-        } else {
-            cat = get_from_patt(f, cat_list, cat_count);
-            proj = get_proj_path(cat, s);
-        }
 
-        if (cat && proj) {
-            puts(proj);
+            if (proj) {
+                char * project = get_from_patt(proj, proj_list, count);
+                if (project) {
+
+                    char proj_path[] = "";
+                    strcat(proj_path, get_cat_path(category));
+                    strcat(proj_path, project);
+                    if (proj_path[strlen(proj_path)-1] != '/')
+                        strcat(proj_path, "/");
+
+                    if (subdir)
+                        strcat(proj_path, subdir);
+
+                    puts(proj_path);
+
+                } else die("Project not found!");
+                free_list(cat_list, cat_count);
+                free_list(proj_list, count);
+                exit(0);
+
+            } else if (category)
+                puts(get_cat_path(category));
+
+        } else if (!cat && !proj) {
+            putchar('\n');
+            for (int i = 0; i < cat_count; i ++) {
+                if (strcmp(cat_list[i], ".")&&strcmp(cat_list[i], ".."))
+                {
+                    cat = cat_list[i];
+                    puts(get_cat_path(cat));
+                }
+            }
         } else if (cat) {
-            puts(cat);
-        } else if (proj) {
-            puts(proj);
-        } else {
-            die("category or project not found!");
+            char * category = get_from_patt(cat, cat_list, cat_count);
+            just_ls(get_cat_path(category), "%s  %s\n", types);
         }
     }
+
 
     free_list(cat_list, cat_count);
     return 0;
