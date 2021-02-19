@@ -229,6 +229,7 @@ int main(int argc, char *argv[]) {
 
 char * get_from_patt(char * patt, char **list, int count) {
     for (int i = 0; i < count; i ++) {
+        if (list[i] == NULL) continue;
         char * l_patt = to_lower(patt);
         char * name = to_lower(list[i]);
 
