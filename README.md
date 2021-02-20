@@ -1,4 +1,8 @@
-# CupMan - Coff3e Unamed Project Manager
+# Cup Man - Coff3e Unamed Project Manager
+
+![Cup Icon](./icon.svg)
+
+
 
 This is a simple project to management of project folders, it can to list the categories, projects or the files inside the projects and easyly to change for the project directory.
 
