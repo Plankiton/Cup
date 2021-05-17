@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <regex.h>
 #include "icon.h"
 #include "cup.h"
 
@@ -228,13 +229,16 @@ int main(int argc, char *argv[]) {
 }
 
 char * get_from_patt(char * patt, char **list, int count) {
+    regex_t pattern;
     for (int i = 0; i < count; i ++) {
         if (list[i] == NULL) continue;
         char * l_patt = to_lower(patt);
         char * name = to_lower(list[i]);
 
-        if (strstr(name, l_patt)) {
-            return list[i];
+        if (!regcomp(&pattern, l_patt, 0)) {
+            if (!regexec(&pattern, name, 0, NULL, 0)) {
+                return list[i];
+            }
         }
     }
 
