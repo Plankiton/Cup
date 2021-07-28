@@ -235,7 +235,7 @@ char * get_from_patt(char * patt, char **list, int count) {
         char * l_patt = to_lower(patt);
         char * name = to_lower(list[i]);
 
-        if (!regcomp(&pattern, l_patt, 0)) {
+        if (!regcomp(&pattern, l_patt, REG_EXTENDED)) {
             if (!regexec(&pattern, name, 0, NULL, 0)) {
                 return list[i];
             }
