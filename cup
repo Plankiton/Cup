@@ -14,15 +14,17 @@ def type_name(t):
         list: "list",
     }[t]    
 
-def help(cmds):
+def help(title, cmds):
     print(f":: {a[0]} Configuration")
+    print(f" > {title}")
     for cmd in cmds:
-        print(f'{cmd},{cmds[cmd]["alt"].ljust(20)}\t{type_name(cmds[cmd]["type"])}\t{"ex: "+cmds[cmd]["example"] if "example" in cmds[cmd] else ""}')
+        print(f'  {cmd},{cmds[cmd]["alt"].ljust(20)}\t{type_name(cmds[cmd]["type"])}\t{"ex: "+cmds[cmd]["example"] if "example" in cmds[cmd] else ""}')
     exit(0)
 
 def cp(src, dst):
     print(f":: Copying {src} to {dst}")
-    exec(f"cp {src} {dst}")
+    print(f" > cp {src} {dst}")
+    print(exec(f"cp {src} {dst} 2> /dev/stdout").read())
 
 def hidde_spaces(s):
     return s.replace("\\ ", "&spc;")
@@ -30,69 +32,9 @@ def hidde_spaces(s):
 def fix_spaces(s):
     return s.replace("&spc", " ")
 
-def main(args):
-    commands = {
-        "-i": {
-            "type": bool,
-            "value": False,
-            "alt": "--install",
-        },
-
-        "-h": {
-            "type": bool,
-            "value": False,
-            "alt": "--help",
-        },
-
-        "-c": {
-            "type": str,
-            "value": None,
-            "alt": "--config",
-        },
-
-        "-u": {
-            "type": bool,
-            "value": False,
-            "alt": "--update"
-        },
-
-        "-p": {
-            "type": list,
-            "value": False,
-            "alt": "--package"
-        },
-
-        "-d": {
-            "type": str,
-            "value": None,
-            "alt": "--pkg-install-cmd"
-        },
-
-        "-e": {
-            "type": list,
-            "value": None,
-            "alt": "--execute",
-            "example": "-e cmd -e cmd",
-        },
-
-        "-m": {
-            "type": list,
-            "value": None,
-            "alt": "--src-dst-map",
-            "example": "-m src,dst -m src2,dst2",
-        },
-    }
-
+def parse_args(commands, args):
     i = 0
     of_to = { commands[k]["alt"]:k for k in commands }
-
-    if commands["-c"]["value"]:
-        with open(commands["-c"]["value"]) as config:
-            for txt in config.readlines():
-                txt = hidde_spaces(txt).split(" ")
-                for a in txt:
-                    args.append(fix_spaces(a))
-
     for cmd in args:
         if cmd in of_to:
             cmd = of_to[cmd]
@@ -115,11 +57,76 @@ def main(args):
                 args.pop(i+1)
             except Exception as e:
                 err(f"Occurred an error parsing {cmd} argument: ", e)
+        if "drop" in commands[cmd]:
+            if commands[cmd]["drop"]:
+                return commands
 
         i += 1
+    return commands
+
+def dotfiles(args):
+    commands = parse_args({
+                              "-i": {
+                                  "type": bool,
+                                  "value": False,
+                                  "alt": "--install",
+                              },
+
+                              "-h": {
+                                  "type": bool,
+                                  "value": False,
+                                  "alt": "--help",
+                                  "drop": True,
+                              },
+
+                              "-c": {
+                                  "type": str,
+                                  "value": None,
+                                  "alt": "--config",
+                              },
+
+                              "-u": {
+                                  "type": bool,
+                                  "value": False,
+                                  "alt": "--update"
+                              },
+
+                              "-p": {
+                                  "type": list,
+                                  "value": False,
+                                  "alt": "--package"
+                              },
+
+                              "-d": {
+                                  "type": str,
+                                  "value": None,
+                                  "alt": "--pkg-install-cmd"
+                              },
+
+                              "-e": {
+                                  "type": list,
+                                  "value": None,
+                                  "alt": "--execute",
+                                  "example": "-e cmd -e cmd",
+                              },
+
+                              "-m": {
+                                  "type": list,
+                                  "value": None,
+                                  "alt": "--src-dst-map",
+                                  "example": "-m src,dst -m src2,dst2",
+                              },
+                          }, args)
+
+    if commands["-c"]["value"]:
+        with open(commands["-c"]["value"]) as config:
+            for txt in config.readlines():
+                txt = hidde_spaces(txt).split(" ")
+                for a in txt:
+                    args.append(fix_spaces(a))
 
     if commands["-h"]["value"]:
-        help(commands)
+        help("DotFiles Manager", commands)
 
     if commands["-i"]["value"]:
         if commands["-u"]["value"]:
@@ -135,7 +142,7 @@ def main(args):
         if commands["-e"]["value"]:
             print(":: Executing commands")
             for exec_cmd in commands["-e"]["value"]:
-               print(exec(exec_cmd).read())
+               print(exec(exec_cmd + " 2>> /dev/stdout").read())
 
         if commands["-p"]["value"]:
             pkg_install_cmd = commands["-d"]["value"]
@@ -149,4 +156,24 @@ def main(args):
         return
 
 if __name__ == "__main__":
-    main(a[1:])
+    commands = parse_args({
+                              "df": {
+                                  "value": False,
+                                  "type": bool,
+                                  "alt": "dotfiles",
+                                  "drop": True,
+                              },
+                              "h": {
+                                  "value": False,
+                                  "type": bool,
+                                  "alt": "help",
+                                  "drop": True,
+                              },
+                          }, a[1:])
+
+    if commands["df"]["value"]:
+        dotfiles(a[2:])
+    elif commands["h"]["value"]:
+        help("Command Manager", commands)
+    else:
+        err("Command not found, try h or help")
