@@ -30,7 +30,7 @@ def hidde_spaces(s):
     return s.replace("\\ ", "&spc;")
 
 def fix_spaces(s):
-    return s.replace("&spc", " ")
+    return s.replace("&spc;", " ")
 
 def parse_args(commands, args):
     i = 0
@@ -79,12 +79,6 @@ def dotfiles(args):
                                   "drop": True,
                               },
 
-                              "-c": {
-                                  "type": str,
-                                  "value": None,
-                                  "alt": "--config",
-                              },
-
                               "-u": {
                                   "type": bool,
                                   "value": False,
@@ -118,17 +112,6 @@ def dotfiles(args):
                               },
                           }, args)
 
-    if commands["-c"]["value"]:
-        with open(commands["-c"]["value"]) as config:
-            for txt in config.readlines():
-                if txt[0] == "#":
-                    continue
-                txt = hidde_spaces(txt).split(" ")
-                for a in txt:
-                    if a[0] == "#":
-                        break
-                    args.append(fix_spaces(a))
-
     if commands["-h"]["value"]:
         help("DotFiles Manager", commands)
 
@@ -159,12 +142,35 @@ def dotfiles(args):
 
         return
 
+def config(commands):
+    args = []
+    if commands["c"]["value"]:
+        with open(commands["c"]["value"]) as config:
+            for txt in config.readlines():
+                if txt[0] == "#":
+                    continue
+                txt = hidde_spaces(txt).split(" ")
+                for a in txt:
+                    if a[0] == "#":
+                        break
+                    args.append(fix_spaces(a))
+        print(":: Loading configuration")
+        print(" > "+ " ".join(args))
+        commands["c"]["value"] = None
+    return parse_args(commands, args), args
+
 if __name__ == "__main__":
     commands = parse_args({
                               "df": {
                                   "value": False,
                                   "type": bool,
                                   "alt": "dotfiles",
+                                  "drop": True,
+                              },
+                              "c": {
+                                  "value": None,
+                                  "type": str,
+                                  "alt": "config",
                                   "drop": True,
                               },
                               "h": {
@@ -174,9 +180,9 @@ if __name__ == "__main__":
                                   "drop": True,
                               },
                           }, a[1:])
-
+    commands, args = config(commands) 
     if commands["df"]["value"]:
-        dotfiles(a[2:])
+        dotfiles(args)
     elif commands["h"]["value"]:
         help("Command Manager", commands)
     else:
