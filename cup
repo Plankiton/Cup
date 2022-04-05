@@ -1,0 +1,152 @@
+#!/bin/python3
+from sys import argv as a, stderr
+from os import popen as exec
+
+def err(*s):
+    print("!!", " ".join(s), file=stderr)
+    exit(1)
+
+def type_name(t):
+    return {
+        int: "inteiro",
+        bool: "boolean (true|false)",
+        str: "string",
+        list: "list",
+    }[t]    
+
+def help(cmds):
+    print(f":: {a[0]} Configuration")
+    for cmd in cmds:
+        print(f'{cmd},{cmds[cmd]["alt"].ljust(20)}\t{type_name(cmds[cmd]["type"])}\t{"ex: "+cmds[cmd]["example"] if "example" in cmds[cmd] else ""}')
+    exit(0)
+
+def cp(src, dst):
+    print(f":: Copying {src} to {dst}")
+    exec(f"cp {src} {dst}")
+
+def hidde_spaces(s):
+    return s.replace("\\ ", "&spc;")
+
+def fix_spaces(s):
+    return s.replace("&spc", " ")
+
+def main(args):
+    commands = {
+        "-i": {
+            "type": bool,
+            "value": False,
+            "alt": "--install",
+        },
+
+        "-h": {
+            "type": bool,
+            "value": False,
+            "alt": "--help",
+        },
+
+        "-c": {
+            "type": str,
+            "value": None,
+            "alt": "--config",
+        },
+
+        "-u": {
+            "type": bool,
+            "value": False,
+            "alt": "--update"
+        },
+
+        "-p": {
+            "type": list,
+            "value": False,
+            "alt": "--package"
+        },
+
+        "-d": {
+            "type": str,
+            "value": None,
+            "alt": "--pkg-install-cmd"
+        },
+
+        "-e": {
+            "type": list,
+            "value": None,
+            "alt": "--execute",
+            "example": "-e cmd -e cmd",
+        },
+
+        "-m": {
+            "type": list,
+            "value": None,
+            "alt": "--src-dst-map",
+            "example": "-m src,dst -m src2,dst2",
+        },
+    }
+
+    i = 0
+    of_to = { commands[k]["alt"]:k for k in commands }
+
+    if commands["-c"]["value"]:
+        with open(commands["-c"]["value"]) as config:
+            for txt in config.readlines():
+                txt = hidde_spaces(txt).split(" ")
+                for a in txt:
+                    args.append(fix_spaces(a))
+
+    for cmd in args:
+        if cmd in of_to:
+            cmd = of_to[cmd]
+
+        if cmd not in commands:
+            err(f"The argument {cmd} was not found")
+            
+        if commands[cmd]["type"] == bool:
+            commands[cmd]["value"] = True
+        else:
+            if (len(args)-1) < i+1:
+                err("What is the value of", cmd, "argument?")
+            try:
+                if commands[cmd]["type"] == list:
+                    if not commands[cmd]["value"]:
+                        commands[cmd]["value"] = []
+                    commands[cmd]["value"].append(args[i+1])
+                else:
+                    commands[cmd]["value"] = commands[cmd]["type"](args[i+1])
+                args.pop(i+1)
+            except Exception as e:
+                err(f"Occurred an error parsing {cmd} argument: ", e)
+
+        i += 1
+
+    if commands["-h"]["value"]:
+        help(commands)
+
+    if commands["-i"]["value"]:
+        if commands["-u"]["value"]:
+            err("You cant use -i and -u together")
+
+        if commands["-m"]["value"]:
+            try:
+                for src, dst in [(i.split(",")[0], i.split(",")[1]) for i in commands["-m"]["value"]]:
+                    cp(src, dst)
+            except Exception as e:
+                err(f"Occurred an error parsing -m argument: ", e)
+
+        if commands["-e"]["value"]:
+            print(":: Executing commands")
+            for exec_cmd in commands["-e"]["value"]:
+               print(exec(exec_cmd).read())
+
+        if commands["-p"]["value"]:
+            pkg_install_cmd = commands["-d"]["value"]
+            if not pkg_install_cmd:
+                err("-d is required")  
+            
+            print(":: Installing packages")
+            print(f' -> {pkg_install_cmd} {" ".join(commands["-p"]["value"])}')
+            print(exec(f'{pkg_install_cmd} {" ".join(commands["-p"]["value"])}').read())
+
+        return
+
+if __name__ == "__main__":
+    main(a[1:])
