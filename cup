@@ -1,6 +1,9 @@
 #!/bin/python3
 from sys import argv as a, stderr
-from os import popen as exec
+from os import popen
+
+def exec(*a):
+    return popen(" ".join(a))
 
 def err(*s):
     print("!!", " ".join(s), file=stderr)
@@ -24,13 +27,26 @@ def help(title, cmds):
 def cp(src, dst):
     print(f":: Copying {src} to {dst}")
     print(f" > cp {src} {dst}")
-    print(exec(f"cp {src} {dst} 2> /dev/stdout").read())
+    print(exec(f"cp -rfv {src} {dst} 2> /dev/stdout").read())
 
 def hidde_spaces(s):
-    return s.replace("\\ ", "&spc;")
+    chars = [
+        (r"\ ", "&spc;"),
+        (r"\"", '&asp;'),
+    ]
+    for c, v in chars:
+        s = s.replace(c, v)
+    return s
 
 def fix_spaces(s):
-    return s.replace("&spc;", " ")
+    chars = [
+        ("&spc;", " "),
+        ("&asp;", '"'),
+    ]
+    for c, v in chars:
+        s = s.replace(v, "")
+        s = s.replace(c, v)
+    return s
 
 def parse_args(commands, args):
     i = 0
@@ -104,6 +120,19 @@ def dotfiles(args):
                                   "example": "-e cmd -e cmd",
                               },
 
+                              "-eu": {
+                                  "type": list,
+                                  "value": None,
+                                  "alt": "--execute-on-update",
+                                  "example": "-eu cmd -eu cmd",
+                              },
+
+                              "-r": {
+                                  "type": str,
+                                  "value": None,
+                                  "alt": "--pkg-remove-cmd",
+                              },
+
                               "-m": {
                                   "type": list,
                                   "value": None,
@@ -141,9 +170,34 @@ def dotfiles(args):
             print(exec(f'{pkg_install_cmd} {" ".join(commands["-p"]["value"])}').read())
 
         return
+    if commands["-u"]["value"]:
+        if commands["-i"]["value"]:
+            err("You cant use -i and -u together")
 
-def config(commands):
+        if commands["-m"]["value"]:
+            try:
+                for dst, src in [(i.split(",")[0], i.split(",")[1]) for i in commands["-m"]["value"]]:
+                    cp(src, dst)
+            except Exception as e:
+                err(f"Occurred an error parsing -m argument: ", e)
+
+        if commands["-eu"]["value"]:
+            print(":: Executing Reverse commands")
+            for exec_cmd in commands["-eu"]["value"]:
+               print(exec(exec_cmd + " 2>> /dev/stdout").read())
+
+        if commands["-p"]["value"]:
+            pkg_remove_cmd = commands["-r"]["value"]
+            if not pkg_remove_cmd:
+                err("-r is required")  
+            
+            print(":: Installing packages")
+            print(f' -> {pkg_remove_cmd} {" ".join(commands["-p"]["value"])}')
+            print(exec(f'{pkg_remove_cmd} {" ".join(commands["-p"]["value"])}').read())
+
+def config(commands, cmd_list):
     args = []
+    of_to = { commands[k]["alt"]:k for k in commands }
     if commands["c"]["value"]:
         with open(commands["c"]["value"]) as config:
             for txt in config.readlines():
@@ -153,7 +207,14 @@ def config(commands):
                 for a in txt:
                     if a[0] == "#":
                         break
-                    args.append(fix_spaces(a))
+                    if a in of_to:
+                        a = of_to[a]
+
+                    if a in cmd_list:
+                        break
+                    if len(fix_spaces(a.strip())) == 0:
+                        break
+                    args.append(fix_spaces(a.strip()))
         print(":: Loading configuration")
         print(" > "+ " ".join(args))
         commands["c"]["value"] = None
@@ -173,6 +234,12 @@ if __name__ == "__main__":
                                   "alt": "config",
                                   "drop": True,
                               },
+                              "u": {
+                                  "value": False,
+                                  "type": bool,
+                                  "alt": "update",
+                                  "drop": True,
+                              },
                               "h": {
                                   "value": False,
                                   "type": bool,
@@ -180,9 +247,9 @@ if __name__ == "__main__":
                                   "drop": True,
                               },
                           }, a[1:])
-    commands, args = config(commands) 
+    commands, args = config(commands, [cmd for cmd in commands]) 
     if commands["df"]["value"]:
-        dotfiles(args)
+        dotfiles(args[1:])
     elif commands["h"]["value"]:
         help("Command Manager", commands)
     else:
