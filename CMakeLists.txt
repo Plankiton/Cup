@@ -25,8 +25,7 @@ project(
 # Output libname matches target name, with the usual extensions on your system
 # find_package(ZLIB)
 
-# add_library(BitPNGLib png.c png.h)
-# add_library(BitCRCLib crc.c crc.h)
+add_library(argparse argparse.c argparse.h)
 
 # Link each target with other targets or add options, etc.
 
@@ -35,4 +34,4 @@ add_executable(cup main.c)
 
 # Make sure you link your targets with this command. It can also link libraries and
 # even flags, so linking a target that does not exist will not give a configure-time error.
-target_link_libraries(cup) # PRIVATE BitPNGLib ZLIB::ZLIB) # BitCRCLib)
+target_link_libraries(cup PRIVATE argparse)
